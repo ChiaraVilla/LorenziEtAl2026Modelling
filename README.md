@@ -35,7 +35,7 @@ along with this program.  If not, see https://www.gnu.org/licenses/.
 
 ## Repository content and how to use
 
-The code is set up to simulate the microscopic model (2.1)-(2.2) described in Section 2 of LorenziEtAl2026Modelling, to simulate the PDE (3.48) and the reduced model (66) in LorenziEtAl2026Modelling, under the numerical setup detailed in Section 4.1 of LorenziEtAl2026Modelling. <br />
+The code is set up to simulate the microscopic model (2.1)-(2.2) described in Section 2 of LorenziEtAl2026Modelling, to simulate the PDE (3.48) and the reduced model (4.15) in LorenziEtAl2026Modelling, under the numerical setup detailed in Section 4.1 of LorenziEtAl2026Modelling. <br />
 
 **To change the model set up:** <br />
 - 'Parameters.m' : the main parameter values of the simulations can be modified here, including the value of the first order correction coefficient 'epsilon'. This does not include numerical scheme-specific parameters, which can be modified in the respective files for simulating the macroscopic (SimPDE) and microscopic (SimMC) models. This function is called from the files:  MICRO_SimMC_1D.m, MICRO_SimMC_2D.m, MACRO_SimPDE_1D.m, MACRO_SimPDE_2D.m and 'MACRO_Sim_2D_SIM.m'.
@@ -61,7 +61,7 @@ The code is set up to simulate the microscopic model (2.1)-(2.2) described in Se
 
 The data produced by simulations that is used to obtain the plots in LorenziEtAl2026Modelling was stored in a folder 'Saved data'. Due to data file sizes, these are not uploaded in the repository. We detail how to reproduce the figures from scratch and note that the files below to create plots call data files stored in a folder 'Saved data', which may need to be adapted if produced data is stored elsewhere (or with different file names). <br />
 
-**To reproduce the figures in Section 4.3 of LorenziEtAl2024Modelling:** <br />
+**To reproduce the figures in Section 4.3 of LorenziEtAl2026Modelling:** <br />
 - 'Plot_comparison_1D_eps.m' : file to reproduce figure 2. One must first run  'MICRO_SimMC_1D.m' and 'MACRO_SimPDE_1D_DD.m' for the different values of 'epsilon' that should be plot and save the data.
 - 'Plot_comparison_2D.m' : file to reproduce figure 3. One must first run  'MICRO_SimMC_2D.m' and 'MACRO_SimPDE_2D.m', selecting Kappa = 'DD', for the chosen value of 'epsilon' that should be plot and save the data.
 - 'Plot_stripes.m' : function to reproduce figures 4, 5, 6 and 7. This function is called from within 'MACRO_Sim_2D.m' and 'MACRO_Sim_2D_SIM.m' to plot results, so just run that file with the chosen set up. <br />
