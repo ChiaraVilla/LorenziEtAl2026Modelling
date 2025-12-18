@@ -1,36 +1,3 @@
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%                                                                     %%%
-%%%      Plot stripes and cells at final time (macroscopic model)       %%%
-%%%                                                                     %%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-function Plot_stripes(rho0,rhoA,rhoB,par,x1,x2)
-
-set(gca,'TickLabelInterpreter','latex')
-hold on
-set(0,'DefaultAxesFontSize',14)
-rhomax = max([max(max(rhoA)),max(max(rhoB))]);
-%rhomax = 1.0729;
-
-clf
-subplot(1,3,1)
-Plot_StripeS_Timet(rho0,x1,x2,par,par.x1min,par.x1max,par.x2min,par.x2max,rhomax,'n')
-title(['Initial conditions (0h)'])
-
-subplot(1,3,2)
-Plot_StripeS_Timet(rhoA,x1,x2,par,par.x1min,par.x1max,par.x2min,par.x2max,rhomax,'n')
-title(['A) $\bar{y}_K^L=\bar{y}_K^F=0$ (48h)'])
-% subplot(2,3,5)
-% Plot_StripeS_Timet(rhoA,x1,x2,par,11./4,21./4,0-5./4,0+5./4,rhomax,'z')
-
-subplot(1,3,3)
-Plot_StripeS_Timet(rhoB,x1,x2,par,par.x1min,par.x1max,par.x2min,par.x2max,rhomax,'n')
-title(['B) $\bar{y}_K^L=1$, $\bar{y}_K^F=0$ (48h)'])
-% subplot(2,3,6)
-% Plot_StripeS_Timet(rhoB,x1,x2,par,11./4,21./4,2-5./4,2+5./4,rhomax,'z')
-
-end
-
 function Plot_StripeS_Timet(rho,x1,x2,par,x1min,x1max,x2min,x2max,rhomax,zoomin)
 
     % Laminin and Fibronectin stripes
@@ -89,6 +56,7 @@ function Plot_StripeS_Timet(rho,x1,x2,par,x1min,x1max,x2min,x2max,rhomax,zoomin)
     lineconnect = line('XData',[par.str2,par.str2], 'YData',[x2min,0], 'ZData',[20,20], ...
         'Color',[.7 .7 .7],'LineWidth',2,'LineStyle','--');
     drawnow
+
 
 
 end

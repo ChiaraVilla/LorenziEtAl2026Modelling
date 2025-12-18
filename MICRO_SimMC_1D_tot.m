@@ -1,14 +1,20 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%                                                                     %%%
-%%%   "Phenotype-structuring of non-local kinetic models of cell        %%%     
-%%%           migration driven by environmental sensing"                %%%
+%%%   "Modelling collective migration of phenotypically heterogeneous   %%%
+%%%          cell populations: from single-cell dynamics                %%%     
+%%%                to population-level behaviours"                      %%%
 %%%                                                                     %%%
-%%%              T. Lorenzi, N. Loy, C. Villa, 2026                     %%%
+%%%        T. Lorenzi, N. Loy (*), L. Preziosi, C. Villa, 2026          %%%
 %%%                                                                     %%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%                                                                     %%%
 %%%  Code for the numerical integration of the microscopic (2.1)-(2.2)  %%%
 %%%  with a Monte Carlo scheme in 1D.  [copyright: Nadia Loy (*)]       %%%
+%%%                                                                     %%%
+%%%  This version differs from the one in 'MICRO_SimMC_1D_tot.m'        %%%
+%%%  because it also takes into account the interactions in which       %%%
+%%%  both phenotypic switching and directional changes occur - an       %%%
+%%%  effect of order Dt^2.                                              %%%
 %%%                                                                     %%%
 %%% (*) nadia.loy@polito.it                                             %%%
 %%%                                                                     %%%
@@ -44,6 +50,18 @@ Nx1 = length(xg1);
 Nx2 = length(xg2);
 xg1 = [xg1,b+0.5*Dx1];
 xg2 = [xg2,d+0.5*Dx2];
+
+%%% Velocity domain
+Vmax = 1.7;
+dv = 1e-2;
+vmod = [0:dv:Vmax];
+
+%%% Phenotype domain
+ymax = 1;
+ymin = 0;
+dy = 0.05;
+yy = ymin:dy:ymax;
+Ny = length(yy);
 
 %%% Time discretization
 Dt = 1e-4;

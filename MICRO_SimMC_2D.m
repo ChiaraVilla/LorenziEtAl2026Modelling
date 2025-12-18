@@ -3,11 +3,11 @@
 %%%   "Phenotype-structuring of non-local kinetic models of cell        %%%     
 %%%           migration driven by environmental sensing"                %%%
 %%%                                                                     %%%
-%%%              T. Lorenzi, N. Loy, C. Villa, 2024                     %%%
+%%%              T. Lorenzi, N. Loy, C. Villa, 2026                     %%%
 %%%                                                                     %%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%                                                                     %%%
-%%%  Code for the numerical integration of the microscopic (1)-(2)      %%%
+%%%  Code for the numerical integration of the microscopic (2.1)-(2.2)  %%%
 %%%  with a Monte Carlo scheme in 2D.  [copyright: Nadia Loy (*)]       %%%
 %%%                                                                     %%%
 %%% (*) nadia.loy@polito.it                                             %%%

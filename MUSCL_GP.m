@@ -3,7 +3,7 @@
 %%%               MUSCL** scheme for computing the flux                 %%%
 %%%                  [copyright: Chiara Villa (*)]                      %%%
 %%%                                                                     %%%
-%%% (*) chiara.villa.1[at]sorbonne-universite.fr                        %%%
+%%% (*) chiara[dot]villa[at]math[dot]cnrs[dot]fr                        %%%
 %%%                                                                     %%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%                                                                     %%%

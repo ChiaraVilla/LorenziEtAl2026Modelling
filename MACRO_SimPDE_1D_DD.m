@@ -3,15 +3,15 @@
 %%%   "Phenotype-structuring of non-local kinetic models of cell        %%%     
 %%%           migration driven by environmental sensing"                %%%
 %%%                                                                     %%%
-%%%              T. Lorenzi, N. Loy, C. Villa, 2024                     %%%
+%%%              T. Lorenzi, N. Loy, C. Villa, 2026                     %%%
 %%%                                                                     %%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%                                                                     %%%
 %%%  Code to simulate Stripe migration essays of Goodman et al. (1989)  %%%
-%%%  over laminin & fibronectin, with the macroscopic model of Eq.(44)  %%%
-%%%                 in 1D [copyright: Chiara Villa (*)]                 %%%
+%%%      over laminin & fibronectin, with the macroscopic model of      %%%
+%%%  Eq.(3.50) in 1D for K = Dirac delta [copyright: Chiara Villa (*)]  %%%
 %%%                                                                     %%%
-%%% (*) chiara.villa.1[at]sorbonne-universite.fr                        %%%
+%%% (*) chiara[dot]villa[at]math[dot]cnrs[dot]fr                        %%%
 %%%                                                                     %%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 clc
@@ -30,10 +30,6 @@ add = ''; % default
 
 %% Parameters 
 
-%%% Choose Kappa definition:
-Kappa = 'DD'; % Dirac delta
-% Kappa = 'VM'; % Von Mises
-
 %%% Problem parameters (in units of 10^-2 cm)
 par = Parameters();
 par.eps = 0.001;
@@ -46,12 +42,8 @@ par.dx2 = dx;
 x2 = (par.x2min+0.5*par.dx2):par.dx2:(par.x2max-0.5*par.dx2); % Cell centres
 Nx2 = length(x2);
 
-%%% Time discretisation
-dt = 0.01; % NOTE: this will be updated by CFL condition after computing UT, DT
-Tend = 48;
-t = 0:dt:Tend;
-Nt = length(t);
-tstore = [0:1:Tend];
+%%% Final time
+Tend = 40;
 
 %% Initial conditions
 rho0 = zeros(1,Nx2);
@@ -66,47 +58,32 @@ Mass = sum(rho0,"all")*par.dx2;
 %% Computation of the advection velocity
 %  > Details of the problem-specific definitions affecting UT are given in 
 %    the file 'Nonlocal_advection.m' 
-%  > UT and DT are calculated and given at the cell edges
+%  > UT_eps and DT_eps are calculated and given at the cell edges
+%  > UT_eps = UT(1-eps\div UT)
+%  > DT_eps = eps*DT
 
 % 1D: A = LN stripe and B = FN stripe
-[UTx2A,UTx2B,DTx2A,DTx2B] = Nonlocal_advection_1D(par,Kappa);
+[UTx2A,UTx2B,DTx2A,DTx2B] = Nonlocal_advection_1D_DD(par);
 
-save([folder,'Saved_',date,'_Setup_1D_eps',D,'.mat'],'par','Kappa','UTx2A',"UTx2B",'DTx2A',"DTx2B")
+% save([folder,'Saved_',date,'_Setup_1D_eps',D,'.mat'],'par','UTx2A',"UTx2B",'DTx2A',"DTx2B")
 
-%% Setup solver for equation (73)-(74) - Advection velocity UT(1-eps\div UT)
+%% Setup solver for equation (3.50) 
 %%%
-%%% \dt p + \div ( p * UT(1-eps\div UT) ) = \div \div (eps * DT * p )
+%%% \dt p + \div ( p * UT_eps ) = \div \div ( DT_eps * p )
 
-%%% Ghost points to compute \div UT (ensuring no-flux boundary conditions)
-UTx2gpA = [UTx2A(:,1),UTx2A,UTx2A(:,end)];
-UTx2gpB = [UTx2B(:,1),UTx2B,UTx2B(:,end)];
-
-%%% First order correction contribution to advection velocity
-UTx2A = UTx2A.*( 1 - par.eps*((UTx2gpA(:,3:end)-UTx2gpA(:,1:end-2))./(2*par.dx2)) );
-UTx2B = UTx2B.*( 1 - par.eps*((UTx2gpB(:,3:end)-UTx2gpB(:,1:end-2))./(2*par.dx2)) );
-
-%%% D_T needs to be given at cell interface
+%%% DT_eps needed at cell centers in this formulation of the equation
 DTA_c = 0.5*(DTx2A(2:end)+DTx2A(1:end-1));
 DTB_c = 0.5*(DTx2B(2:end)+DTx2B(1:end-1));
 
-%%% Explicit diffusion matrix: eps * \div \div (...)
-DMx2 = DM_def(Nx2,par.dx2,par.eps);
+%%% Explicit diffusion matrix: \div \div (...)
+DMx2 = DM_def(Nx2,par.dx2);
 
 %% Iterate in time (MUSCL scheme)
 
-%%% Store 
-rhoA = rho0;
-rhostoreA = [rhoA];
-rhoB = rho0;
-rhostoreB = [rhoB];
-
 %%% CFL condition
-UmaxA = max(max(UTx2A));
-UmaxB = max(max(UTx2B));
-Umax = max(UmaxA,UmaxB);
-DmaxA = max(max(DTx2A));
-DmaxB = max(max(DTx2B));
-Dmax = par.eps*max(DmaxA,DmaxB);
+dt = 0.01; % Choose maximum dt
+Umax = max(max(max(UTx2A)),max(max(UTx2B)));
+Dmax = max(max(max(DTx2A)),max(max(DTx2B)));
 CFL_adv = dx/Umax;
 CFL_diff = (dx^2)/(2*Dmax);
 if dt>CFL_adv || dt>CFL_diff
@@ -114,21 +91,40 @@ if dt>CFL_adv || dt>CFL_diff
    % CFL condition changed the dt, ensure solutions will be stored hourly
    for i=floor(1.0/dt):-1:1
        if mod(1,1.0/i)==0
-           dt = 1.0/i
+           dt = 1.0/i;
            break;
        end
    end
 end
+t = 0:dt:Tend;
+Nt = length(t);
+
+%%% Initialise storing arrays and dynamics variables
+rhostoreA = zeros((Nt-1)*dt,length(rho0));
+rhostoreB = rhostoreA;
+MassA = zeros(1,Nt);
+MassB = zeros(1,Nt);
+rhoA = rho0;
+rhoB = rho0;
+
+%%% Compute recurrent factors for computing of ghost points 
+% % consistently with no-flux boundary conditions
+gp1x2A = (DTx2A(1)./par.dx2 - UTx2A(1)./2)./(DTx2A(1)./par.dx2 + UTx2A(1)./2);
+gpNx2A = (DTx2A(end)./par.dx2 - UTx2A(end)./2)./(DTx2A(end)./par.dx2 + UTx2A(end)./2);
+
+gp1x2B = (DTx2B(1)./par.dx2 - UTx2B(1)./2)./(DTx2B(1)./par.dx2 + UTx2B(1)./2);
+gpNx2B = (DTx2B(end)./par.dx2 - UTx2B(end)./2)./(DTx2B(end)./par.dx2 + UTx2B(end)./2);
+
 
 %%% Iterate
 
-for i=dt:dt:Tend
+for i=1:Nt
 
     %%% Compute df/dx given f=UT*rho, using MUSCL: add ghost points
-    rhogp2A = [zeros(size(rhoA,1),2),rhoA,zeros(size(rhoA,1),2)];
+    rhogp2A = [0,gp1x2A*rhoA(1),rhoA,gpNx2A*rhoA(end),0];
     dfdx2A = MUSCL_GP(rhogp2A,UTx2A,Nx2,3,par.dx2,dt);
 
-    rhogp2B = [zeros(size(rhoB,1),2),rhoB,zeros(size(rhoB,1),2)];
+    rhogp2B = [0,gp1x2B*rhoB(1),rhoB,gpNx2B*rhoB(end),0];
     dfdx2B = MUSCL_GP(rhogp2B,UTx2B,Nx2,3,par.dx2,dt);
 
     %%% Explicit in time
@@ -136,13 +132,15 @@ for i=dt:dt:Tend
 
     rhoB = rhoB - dt*(dfdx2B) + dt*(DMx2*(DTB_c.*(rhoB))')';
 
+
     %%% Store Mass to check Mass Conserrvation
-    Mass = [Mass,sum(rhoB,"all")*par.dx2];
+    MassA(i) = sum(rhoA,"all")*par.dx2;
+    MassB(i) = sum(rhoB,"all")*par.dx2;
 
     %%% Store every hour
-    if ismember(round(i,6),tstore)%mod(1.0,i)==0
-        rhostoreA = [rhostoreA,rhoA];
-        rhostoreB = [rhostoreB,rhoB];
+    if mod(i-1,1/dt)==0
+        rhostoreA(round(1+(i-1)*dt),:) = rhoA;
+        rhostoreA(round(1+(i-1)*dt),:) = rhoB;
         subplot(2,1,1)
         plot(rhoA )
         title('rho (LN)')
@@ -154,7 +152,7 @@ for i=dt:dt:Tend
 
 end
 
-save([folder,'Saved_',date,'_Results_1D_eps',D,'.mat'],'rhostoreA','rhostoreB','Mass','rhoA','rhoB','rho0')
+% save([folder,'Saved_',date,'_Results_1D_eps',D,'.mat'],'rhostoreA','rhostoreB','Mass','rhoA','rhoB','rho0')
 
 %% Final plot
 % load(['Saved_',date,'_Setup.mat'])
@@ -175,11 +173,11 @@ title('FN')
 
 %%% Plot to check mass conservation
 figure(2)
-plot(Mass)
+plot(MassA)
 
 %% Diffusion matrix (finite volume scheme with no-flux BCs)
 
-function DM = DM_def(Nx,dx,D)
+function DM = DM_def(Nx,dx)
 
     %%% Coefficient matrix
     DM = -2*eye(Nx);
@@ -193,6 +191,6 @@ function DM = DM_def(Nx,dx,D)
     DM(Nx,Nx) = -1;
 
     %%% Output
-    DM = D*DM./(dx^2);
+    DM = DM./(dx^2);
 
 end
