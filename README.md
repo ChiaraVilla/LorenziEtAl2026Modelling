@@ -14,7 +14,7 @@ For details we refer the interested reader to this publication.
 Nadia Loy (Politecnico di Torino) and Chiara Villa (Sorbonne Université)
 
 **Citation** <br />
-Loy, N. and Villa, C. (2026). Matlab code to simulate microscopic and macroscopic models of collective cell migration on phenotypically heterogeneous cell populations. DOI [10.5281/zenodo.14552669] <br />
+Loy, N. and Villa, C. (2026). Matlab code to simulate microscopic and macroscopic models of collective cell migration on phenotypically heterogeneous cell populations. DOI [10.5281/zenodo.17981469] <br />  
 If you use this software in your work then please cite the above named paper.
 
 **Copyright notice** <br />
